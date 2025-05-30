@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user_profile {
+  userId     String   @unique
+  first_name String
+  last_name  String?
+  contact    String
+  emailId    String
+  address    String?
+  role       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+   // Foreign key to be set
+  user_auth   user_auth[]
+
+}
+
+model user_auth {
+  userId          String   @unique
+  username        String   @unique
+  password        String
+  isMFAActive     Boolean? @default(false)
+  twoFactorSecret String?  // Nullable by default
+  role            String   @default("Admin")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+    // Establish foreign key relation with user_profile
+  user_profile    user_profile @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+}
+
