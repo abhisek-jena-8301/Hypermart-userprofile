@@ -15,7 +15,7 @@ datasource db {
 }
 
 model user_profile {
-  userId     String   @unique
+  userId     String   @id
   first_name String
   last_name  String?
   contact    String
@@ -24,10 +24,12 @@ model user_profile {
   role       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  status     String   @default("A")
 
-   // Foreign key to be set
-  user_auth   user_auth[]
-
+  // One-to-many with user_auth
+  user_auth      user_auth[]
+  // One-to-one with employee_sal_details
+  employeeSalary employee_sal_details? @relation("UserEmployeeRelation")
 }
 
 model user_auth {
@@ -35,12 +37,26 @@ model user_auth {
   username        String   @unique
   password        String
   isMFAActive     Boolean? @default(false)
-  twoFactorSecret String?  // Nullable by default
+  twoFactorSecret String?
   role            String   @default("Admin")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-    // Establish foreign key relation with user_profile
-  user_profile    user_profile @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  // Many-to-one with user_profile
+  user_profile user_profile @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
 
+model employee_sal_details {
+  emp_id            String  @id
+  dept_id           String
+  pan_number        String
+  per_day_allowance Decimal
+  attendance        Int
+  salary            Decimal
+  bonus             Decimal
+  tax               Decimal
+  net_payable       Decimal
+
+  // One-to-one with user_profile
+  user_profile user_profile @relation("UserEmployeeRelation", fields: [emp_id], references: [userId])
+}
