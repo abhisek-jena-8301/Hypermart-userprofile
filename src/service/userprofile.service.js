@@ -76,7 +76,7 @@ export const registerUser = async (req, res) => {
         first_name: firstName,
         last_name: lastName,
         contact: mobileNo,
-        emailId: email,
+        emailId: emailId,
         address: address,
         role: role,
       },

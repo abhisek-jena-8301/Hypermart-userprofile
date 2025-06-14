@@ -37,7 +37,7 @@ export const fetchEmployeeDetail = async (req, res) => {
         userId: userId,
       },
       include: {
-        employee_sal_details: true, // Include related employee salary details
+        employeeSalary: true, // Include related employee salary details
       },
     });
     console.log("Employee : ", employee);
