@@ -37,3 +37,10 @@ export const validateDeleteRequest = (userId, userToBeDeleted) => {
   else if (role === "ADM" && deletedRole === "ADM") return false;
   return true;
 };
+
+export const validateAdminRequests = (userId) => {
+  console.log("validateAdminRequest : " + userId);
+  const role = userId.slice(0, 3);
+  if (role === "ADM") return true;
+  return false;
+};

@@ -3,6 +3,7 @@ import express, { urlencoded } from "express";
 import cors from "cors";
 import session from "express-session";
 import userRoutes from "./src/controller/user.controller.js";
+import empRoutes from "./src/controller/employee.controller.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(
 
 //Routes
 app.use("/user", userRoutes);
+app.use("/emp", empRoutes);
 
 //Listener
 const PORT = process.env.PORT || 7712;
