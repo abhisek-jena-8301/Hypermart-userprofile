@@ -21,7 +21,7 @@ export const fetchEmployeeList = async (req, res) => {
       .send({ message: "Employee list fetched successfully", list: empList });
   } catch (error) {
     logger.error("Error at fetchEmployeeList : " + error);
-    res.status(500).send({ message: "Error at fetch Emplyoee List" });
+    res.status(500).json({ message: "Error at fetch Employee List" });
   }
 };
 
@@ -47,6 +47,6 @@ export const fetchEmployeeDetail = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error at fetchEmployeeDetail : " + error);
-    res.status(500).send({ message: "Error at fetchUserDetails" });
+    res.status(400).json({ message: "Error at fetchUserDetails" });
   }
 };
