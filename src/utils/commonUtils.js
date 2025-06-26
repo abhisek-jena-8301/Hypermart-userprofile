@@ -1,10 +1,18 @@
+import {
+  EMAIL_REGEX,
+  MOBILE_NO_REGEX,
+  PAN_REGEX,
+  PASSWORD_REGEX,
+  USER_ROLE,
+} from "../constants.js";
+
 //creating UserId
 export const createUserId = (role) => {
   var rolePrefix;
-  if (role === "Admin") {
-    rolePrefix = "ADM";
-  } else if (role === "Employee") {
-    rolePrefix = "EMP";
+  if (role === USER_ROLE.ADMIN_ROLE) {
+    rolePrefix = USER_ROLE.ADMIN_PREFIX;
+  } else if (role === USER_ROLE.EMPLOYEE_ROLE) {
+    rolePrefix = USER_ROLE.EMPLOYEE_PREFIX;
   }
   const userId = rolePrefix + "." + Date.now().toString();
   return userId;
@@ -12,35 +20,36 @@ export const createUserId = (role) => {
 
 //validate MobileNo
 export const validateMobileNo = (mobileNo) => {
-  const regex = /^[6-9]\d{9}$/;
-  const res = regex.test(mobileNo);
-  return res;
+  return MOBILE_NO_REGEX.test(mobileNo);
 };
 
 //validateEmailId
 export const validateEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-  return regex.test(email);
+  return EMAIL_REGEX.test(email);
 };
 
 //validate password
 export const validatePassword = (password) => {
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])[^\s]{8,}$/;
-  return regex.test(password);
+  return PASSWORD_REGEX.test(password);
 };
 
 export const validateDeleteRequest = (userId, userToBeDeleted) => {
   const role = userId.slice(0, 3);
   const deletedRole = userToBeDeleted.slice(0, 3);
-  if (role === "EMP") return false;
+  if (role === USER_ROLE.EMPLOYEE_PREFIX) return false;
   else if (userId === process.env.SUPERADMIN_USER) return true;
-  else if (role === "ADM" && deletedRole === "ADM") return false;
+  else if (role === USER_ROLE.ADMIN_PREFIX && deletedRole === USER_ROLE.ADMIN_PREFIX) return false;
   return true;
 };
 
 export const validateAdminRequests = (userId) => {
   console.log("validateAdminRequest : " + userId);
   const role = userId.slice(0, 3);
-  if (role === "ADM") return true;
+  if (role === USER_ROLE.ADMIN_PREFIX) return true;
   return false;
+};
+
+export const validatePanCardDetails = (panId) => {
+  //regex check for PAN card detail check
+  return PAN_REGEX.test(panId.toUpperCase());
 };

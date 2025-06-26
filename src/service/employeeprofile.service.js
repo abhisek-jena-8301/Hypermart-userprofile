@@ -1,13 +1,16 @@
 import logger from "../config/logger.config.js";
 import prisma from "../config/db.config.js";
 import { validateAdminRequests } from "../utils/commonUtils.js";
+import { ERROR_MESSAGES } from "../constants.js";
 
 export const fetchEmployeeList = async (req, res) => {
   try {
     const userId = req.user.userId;
     console.log("userId : ", userId);
     if (validateAdminRequests(userId) === false) {
-      return res.status(401).send({ message: "Insufficient privileges" });
+      return res
+        .status(401)
+        .send({ message: ERROR_MESSAGES.INSUFFICIENT_PRIVILEGES });
     }
     const empList = await prisma.user_profile.findMany({
       where: {
@@ -28,7 +31,9 @@ export const fetchEmployeeList = async (req, res) => {
 export const fetchEmployeeDetail = async (req, res) => {
   try {
     if (validateAdminRequests(req.user.userId) === false) {
-      return res.status(401).send({ message: "Insufficient privileges" });
+      return res
+        .status(401)
+        .send({ message: ERROR_MESSAGES.INSUFFICIENT_PRIVILEGES });
     }
     const userId = req.params.userId;
     console.log("userId : " + userId);
