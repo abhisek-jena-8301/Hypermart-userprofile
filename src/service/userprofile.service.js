@@ -7,7 +7,11 @@ import {
   validateMobileNo,
   validatePassword,
 } from "../utils/commonUtils.js";
-import { validateDeleteRequest } from "../utils/commonUtils.js";
+import {
+  validateDeleteRequest,
+  validateAdminRequests,
+} from "../utils/commonUtils.js";
+import { DEFAULT_PASSWORD, ERROR_MESSAGES } from "../constants.js";
 
 export const statusCheckApi = (req, res) => {
   console.log("Working");
@@ -132,6 +136,12 @@ export const deleteUser = async (req, res) => {
 
         logger.info("user_profile record deleted: " + userId);
 
+        await prisma.employee_sal_details.delete({
+          where: { emp_id: userId },
+        });
+
+        logger.info("employee_sal_details deleted");
+
         return res.status(200).json({
           message: "user record deleted successfully",
           userId: userId,
@@ -195,5 +205,94 @@ export const fetchUserDetails = async (req, res) => {
     console.log("Error: " + error);
     logger.error("Error at fetch user details: " + error);
     return res.status(400).json({ message: "Unable to fetch user details" });
+  }
+};
+
+export const suspendUser = async (req, res) => {
+  try {
+    if (validateAdminRequests(req.user.userId) === false) {
+      return res
+        .status(401)
+        .send({ message: ERROR_MESSAGES.INSUFFICIENT_PRIVILEGES });
+    }
+    const userId = req.body.userId;
+
+    //delete record from user_auth table
+    await prisma.user_auth.delete({
+      where: { userId: userId },
+    });
+
+    //update the status in user_profile
+    const updatedUser = await prisma.user_profile.update({
+      where: { userId },
+      data: { status: "S" },
+    });
+
+    logger.info("User suspended : " + updatedUser);
+    return res.status(200).json({ message: "User suspended succesfully" });
+  } catch (error) {
+    let error_msg = "Error : ";
+    if (error.code === "P2025") {
+      error_msg += ERROR_MESSAGES.USER_DOES_NOT_EXIST;
+      logger.error("At suspendUser : " + error_msg);
+    } else {
+      logger.error("Error at suspendUser : " + error);
+      error_msg += error;
+    }
+    return res
+      .status(500)
+      .json({ message: "Error at suspendUser", error: error_msg });
+  }
+};
+
+export const resumeUser = async (req, res) => {
+  try {
+    if (validateAdminRequests(req.user.userId) === false) {
+      return res
+        .status(401)
+        .send({ message: ERROR_MESSAGES.INSUFFICIENT_PRIVILEGES });
+    }
+    console.log("req.body : ", req.body);
+    const userId = req.body.userId;
+    const username = req.body.username;
+    if (!userId || !username) {
+      return res.status(400).json({ message: ERROR_MESSAGES.INAVLID_DATA });
+    }
+
+    //updated status in user_profile
+    const updatedUser = await prisma.user_profile.update({
+      where: { userId },
+      data: { status: "A" },
+    });
+    console.log("updatedUser : ", updatedUser);
+
+    //user_auth created
+    const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+    const role = updatedUser.role;
+    await prisma.user_auth.create({
+      data: {
+        userId: userId,
+        username: username,
+        password: hashedPassword,
+        isMFAActive: false,
+        role: role,
+      },
+    });
+
+    logger.info("User resumed : " + updatedUser);
+
+    return res.status(200).json({ message: "User resumed succesfully" });
+  } catch (error) {
+    let error_msg = "Error : ";
+    if (error.code === "P2025") {
+      error_msg += ERROR_MESSAGES.USER_DOES_NOT_EXIST;
+      logger.error("At resumeUser : " + error_msg);
+    } else {
+      logger.error("Error at resumeUser : " + error);
+      error_msg += error;
+    }
+    return res
+      .status(500)
+      .json({ message: "Error at resumeUser", error: error_msg });
   }
 };

@@ -4,7 +4,9 @@ import {
   fetchUserDetails,
   fetchUserRole,
   registerUser,
+  resumeUser,
   statusCheckApi,
+  suspendUser,
 } from "../service/userprofile.service.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
@@ -20,5 +22,10 @@ router.delete("/delete", deleteUser);
 router.get("/fetchUserRole", verifyJWT, fetchUserRole);
 //fetchuserDetails
 router.get("/fetchUserDetails", verifyJWT, fetchUserDetails);
+//suspendUser
+router.put("/suspendUser", verifyJWT, suspendUser);
+//resumeUser
+router.put("/resumeUser", verifyJWT, resumeUser);
+//terminateUser
 
 export default router;
