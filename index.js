@@ -2,9 +2,10 @@ import dotenv from "dotenv";
 import express, { urlencoded } from "express";
 import cors from "cors";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import userRoutes from "./src/controller/user.controller.js";
 import empRoutes from "./src/controller/employee.controller.js";
-import payrollRoutes from "./src/controller/payroll.controller.js"
+import payrollRoutes from "./src/controller/payroll.controller.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "100mb" }));
 app.use(urlencoded({ extended: true, limit: "100mb" }));
+app.use(cookieParser());
 app.use(
   session({
     secret: process.env.SESSION_KEY,
