@@ -5,6 +5,7 @@ export const ERROR_MESSAGES = {
   INAVLID_DATA: "Invalid Data",
   INVALID_ATTENDANCE_DETAILS: "Invalid Attendance value recorded",
   USER_DOES_NOT_EXIST: "userId does not exist",
+  PASSWORD_CRITERIA_NOT_MET: "Password criteria not met, Please try again",
 };
 
 export const DEFAULT_PASSWORD = "000000";

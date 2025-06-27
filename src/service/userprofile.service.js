@@ -55,7 +55,7 @@ export const registerUser = async (req, res) => {
     if (validatePassword(password) !== true) {
       return res
         .status(400)
-        .json({ message: "Password not according to guidelines" });
+        .json({ message: ERROR_MESSAGES.PASSWORD_CRITERIA_NOT_MET });
     }
 
     //validating Emailid
