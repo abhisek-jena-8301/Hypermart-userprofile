@@ -1,10 +1,11 @@
 import prisma from "../config/db.config.js";
 
-export const createOtpRecord = async (userId, otp) => {
+export const createOtpRecord = async (userId, otp, type) => {
   await prisma.otp_record.create({
     data: {
       userId: userId,
       otp: otp,
+      type: type,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry time for otp
     },
   });

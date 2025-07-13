@@ -13,7 +13,11 @@ import {
   validateDeleteRequest,
   validateAdminRequests,
 } from "../utils/commonUtils.js";
-import { DEFAULT_PASSWORD, ERROR_MESSAGES } from "../constants.js";
+import {
+  DEFAULT_PASSWORD,
+  ERROR_MESSAGES,
+  REGISTRATION_MAIL_VERIFY,
+} from "../constants.js";
 import { sendRegistrationOTP } from "../utils/kafkaUtils.js";
 import { createOtpRecord } from "./otprecord.service.js";
 
@@ -114,7 +118,7 @@ export const registerUser = async (req, res) => {
     logger.info("sent message through kafka");
 
     //create otp record
-    createOtpRecord(userId, otp);
+    createOtpRecord(userId, otp, REGISTRATION_MAIL_VERIFY);
     logger.info("otp_record created");
 
     res.status(201).json({
@@ -133,8 +137,11 @@ export const registerUser = async (req, res) => {
 export const verifyOtpForRegistration = async (req, res) => {
   const userId = req.body.userId;
   logger.info("Verify for userId : " + userId);
-  const otp_record = await prisma.otp_record.findUnique({
-    where: { userId: userId },
+  const otp_record = await prisma.otp_record.findFirst({
+    where: { userId: userId, type: REGISTRATION_MAIL_VERIFY },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   //null check for otp record
