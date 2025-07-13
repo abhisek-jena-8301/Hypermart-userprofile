@@ -19,6 +19,11 @@ export const createUserId = (role) => {
   return userId;
 };
 
+//create OTP
+export const createOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 //validate MobileNo
 export const validateMobileNo = (mobileNo) => {
   return MOBILE_NO_REGEX.test(mobileNo);

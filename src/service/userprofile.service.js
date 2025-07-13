@@ -2,6 +2,7 @@ import logger from "../config/logger.config.js";
 import bcrypt from "bcrypt";
 import prisma from "../config/db.config.js";
 import {
+  createOTP,
   createUserId,
   validateEmail,
   validateMobileNo,
@@ -12,6 +13,7 @@ import {
   validateAdminRequests,
 } from "../utils/commonUtils.js";
 import { DEFAULT_PASSWORD, ERROR_MESSAGES } from "../constants.js";
+import { sendRegistrationOTP } from "../utils/kafkaUtils.js";
 
 export const statusCheckApi = (req, res) => {
   console.log("Working");
@@ -83,6 +85,7 @@ export const registerUser = async (req, res) => {
         emailId: emailId,
         address: address,
         role: role,
+        status: "U", //Unverified user
       },
     });
 
@@ -100,6 +103,24 @@ export const registerUser = async (req, res) => {
     });
 
     logger.info("user_auth record created: " + userId);
+
+    //create otp for 2nd step verification
+    const otp = createOTP();
+
+    //creating messages for kafka
+    await sendRegistrationOTP(userId, username, role, otp);
+
+    logger.info("sent message through kafka");
+
+    await prisma.otp_record.create({
+      data: {
+        userId: userId,
+        otp: otp,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry time for otp
+      },
+    });
+
+    logger.info("otp_record created");
 
     res.status(201).json({
       message: "User registered successfully",

@@ -60,3 +60,13 @@ model employee_sal_details {
   // One-to-one with user_profile
   user_profile user_profile @relation("UserEmployeeRelation", fields: [emp_id], references: [userId])
 }
+
+model otp_record {
+  otpId     String   @id @default(uuid())
+  userId    String
+  otp       String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId]) // Indexing based on userId
+}

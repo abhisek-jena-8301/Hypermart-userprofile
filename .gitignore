@@ -3,3 +3,4 @@ node_modules
 src/generated
 migration_lock.toml
 Dockerfile
+prisma/migrations
