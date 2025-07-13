@@ -65,8 +65,10 @@ model otp_record {
   otpId     String   @id @default(uuid())
   userId    String
   otp       String
+  retries   Int      @default(0)
   createdAt DateTime @default(now())
   expiresAt DateTime
+  lastAttempt DateTime?
 
   @@index([userId]) // Indexing based on userId
 }

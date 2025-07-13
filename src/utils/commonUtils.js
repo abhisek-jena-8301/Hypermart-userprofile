@@ -2,10 +2,14 @@ import {
   DEPT,
   EMAIL_REGEX,
   MOBILE_NO_REGEX,
+  NO_MORE_TRIES,
   PAN_REGEX,
   PASSWORD_REGEX,
+  SUCCESS_MAIL_OTP_CHECK,
   USER_ROLE,
 } from "../constants.js";
+import { updateRetryCount } from "../service/otprecord.service.js";
+import { deleteUserRecords } from "../service/userprofile.service.js";
 
 //creating UserId
 export const createUserId = (role) => {
@@ -87,4 +91,45 @@ const calculateTax = (income) => {
   if (income >= 100000) return 0.1 * income;
   else if (income >= 50000) return 0.06 * income;
   else return 0;
+};
+
+export const validateOtp = async (otp_record, otp) => {
+  const now = new Date();
+
+  //lastAttempt check
+  if (otp_record.lastAttempt) {
+    const secondsSinceLastAttempt = (now - otp_record.lastAttempt) / 1000;
+    if (secondsSinceLastAttempt < 10) {
+      return {
+        otpcheck: false,
+        message: `Please wait ${Math.ceil(
+          10 - secondsSinceLastAttempt
+        )} seconds before trying again.`,
+      };
+    }
+  }
+
+  //condition check
+  if (
+    otp_record.otp === otp &&
+    otp_record.retries < 3 &&
+    otp_record.expiresAt > now
+  ) {
+    return { otpcheck: true, message: SUCCESS_MAIL_OTP_CHECK };
+  } else {
+    let retries = otp_record.retries;
+    if (retries == 2) {
+      //deleting record after 3 tries
+      await deleteUserRecords(otp_record.userId);
+      return { otpcheck: false, message: NO_MORE_TRIES };
+    } else {
+      //incrementing retries count
+      retries++;
+      await updateRetryCount(userId, retries);
+      return {
+        otpcheck: false,
+        message: `You have ${3 - retries} chance left for verification`,
+      };
+    }
+  }
 };

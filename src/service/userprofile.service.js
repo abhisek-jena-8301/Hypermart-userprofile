@@ -6,6 +6,7 @@ import {
   createUserId,
   validateEmail,
   validateMobileNo,
+  validateOtp,
   validatePassword,
 } from "../utils/commonUtils.js";
 import {
@@ -14,6 +15,7 @@ import {
 } from "../utils/commonUtils.js";
 import { DEFAULT_PASSWORD, ERROR_MESSAGES } from "../constants.js";
 import { sendRegistrationOTP } from "../utils/kafkaUtils.js";
+import { createOtpRecord } from "./otprecord.service.js";
 
 export const statusCheckApi = (req, res) => {
   console.log("Working");
@@ -109,17 +111,10 @@ export const registerUser = async (req, res) => {
 
     //creating messages for kafka
     await sendRegistrationOTP(userId, username, role, otp);
-
     logger.info("sent message through kafka");
 
-    await prisma.otp_record.create({
-      data: {
-        userId: userId,
-        otp: otp,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes expiry time for otp
-      },
-    });
-
+    //create otp record
+    createOtpRecord(userId, otp);
     logger.info("otp_record created");
 
     res.status(201).json({
@@ -135,6 +130,35 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const verifyOtpForRegistration = async (req, res) => {
+  const userId = req.body.userId;
+  logger.info("Verify for userId : " + userId);
+  const otp_record = await prisma.otp_record.findUnique({
+    where: { userId: userId },
+  });
+
+  //null check for otp record
+  if (!otp_record) {
+    return res.status(404).json({ message: "No OTP record found for user" });
+  }
+
+  const validatedOtp = await validateOtp(otp_record, req.body.otp);
+  if (!validatedOtp.otpcheck) {
+    //otp not matched
+    res.status(400).json({ message: validatedOtp.message });
+  } else {
+    //otp matched
+    await prisma.user_profile.update({
+      where: { userId },
+      data: { status: "A" },
+    });
+    logger.info("Activated the user : " + userId);
+    res
+      .status(200)
+      .json({ message: "Successful verification of email", userId: userId });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.body.userId;
@@ -144,24 +168,7 @@ export const deleteUser = async (req, res) => {
       console.log("userId: ", userId);
 
       if (validateDeleteRequest(req.user.userId, userId)) {
-        //deleting record
-        await prisma.user_auth.delete({
-          where: { userId: userId },
-        });
-
-        logger.info("user_auth record deleted");
-
-        await prisma.user_profile.delete({
-          where: { userId: userId },
-        });
-
-        logger.info("user_profile record deleted: " + userId);
-
-        await prisma.employee_sal_details.delete({
-          where: { emp_id: userId },
-        });
-
-        logger.info("employee_sal_details deleted");
+        await deleteUserRecords(userId);
 
         return res.status(200).json({
           message: "user record deleted successfully",
@@ -177,6 +184,24 @@ export const deleteUser = async (req, res) => {
     return res
       .status(500)
       .json({ loggedIn: false, message: "Not able to delete user" });
+  }
+};
+
+export const deleteUserRecords = async (userId) => {
+  //deleting record
+  try {
+    await prisma.$transaction([
+      prisma.user_auth.delete({ where: { userId } }),
+      prisma.user_profile.delete({ where: { userId } }),
+      prisma.employee_sal_details.deleteMany({ where: { emp_id: userId } }),
+    ]);
+
+    logger.info(`All user records deleted for userId: ${userId}`);
+  } catch (error) {
+    logger.error(
+      `Error deleting user records for userId ${userId}: ${error.message}`
+    );
+    throw new Error("Failed to delete user records.");
   }
 };
 

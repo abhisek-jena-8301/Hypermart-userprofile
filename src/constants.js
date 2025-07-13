@@ -29,3 +29,6 @@ export const DEPT = {
   ADMINISTRATION: "Administration",
   STAFF: "Staff",
 };
+
+export const NO_MORE_TRIES = "No more tries left. Please register again";
+export const SUCCESS_MAIL_OTP_CHECK = "Successfull verification of mail Id";
