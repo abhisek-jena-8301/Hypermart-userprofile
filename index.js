@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./src/controller/user.controller.js";
 import empRoutes from "./src/controller/employee.controller.js";
 import payrollRoutes from "./src/controller/payroll.controller.js";
+import { createTopics, PRODUCER } from "./src/config/kafka.config.js";
 
 dotenv.config();
 
@@ -36,8 +37,32 @@ app.use("/user", userRoutes);
 app.use("/emp", empRoutes);
 app.use("/payroll", payrollRoutes);
 
-//Listener
-const PORT = process.env.PORT || 7712;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const startServer = async () => {
+  try {
+    await createTopics();
+    await PRODUCER.connect();
+    console.log("Kafka ready ✅");
+
+    const PORT = process.env.PORT || 7711;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+};
+
+startServer();
+
+process.on("SIGINT", async () => {
+  console.log("\nShutting down...");
+  try {
+    await PRODUCER.disconnect();
+    console.log("Kafka Producer disconnected 🔌");
+  } catch (err) {
+    console.error("Error during Kafka shutdown:", err);
+  } finally {
+    process.exit(0); // Exit cleanly
+  }
 });
