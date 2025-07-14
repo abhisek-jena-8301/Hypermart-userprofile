@@ -41,7 +41,6 @@ const startServer = async () => {
   try {
     await createTopics();
     await PRODUCER.connect();
-    console.log("Kafka ready ✅");
 
     const PORT = process.env.PORT || 7711;
     app.listen(PORT, () => {
@@ -59,7 +58,19 @@ process.on("SIGINT", async () => {
   console.log("\nShutting down...");
   try {
     await PRODUCER.disconnect();
-    console.log("Kafka Producer disconnected 🔌");
+    console.log("Kafka Producer disconnected");
+  } catch (err) {
+    console.error("Error during Kafka shutdown:", err);
+  } finally {
+    process.exit(0); // Exit cleanly
+  }
+});
+
+process.on("SIGTERM", async () => {
+  console.log("\nShutting down...");
+  try {
+    await PRODUCER.disconnect();
+    console.log("Kafka Producer disconnected");
   } catch (err) {
     console.error("Error during Kafka shutdown:", err);
   } finally {

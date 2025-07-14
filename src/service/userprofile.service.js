@@ -114,11 +114,11 @@ export const registerUser = async (req, res) => {
     const otp = createOTP();
 
     //creating messages for kafka
-    await sendRegistrationOTP(userId, username, role, otp);
+    await sendRegistrationOTP(userId, username, emailId, role, otp);
     logger.info("sent message through kafka");
 
     //create otp record
-    createOtpRecord(userId, otp, REGISTRATION_MAIL_VERIFY);
+    await createOtpRecord(userId, otp, emailId, REGISTRATION_MAIL_VERIFY);
     logger.info("otp_record created");
 
     res.status(201).json({
