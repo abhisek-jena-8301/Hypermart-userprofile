@@ -23,21 +23,27 @@ export const createTopics = async () => {
   try {
     await ADMIN.connect();
     logger.info("Kafka Admin connected");
+    const existingTopics = await ADMIN.listTopics();
+    const topicsToCreate = TOPICS.filter(
+      (topic) => !existingTopics.includes(topic)
+    ) // only create if not exists
+      .map((topic) => ({
+        topic,
+        numPartitions: PARTITION_VALUE,
+        replicationFactor: REPLICATION_FACTOR,
+      }));
 
-    const topicsToCreate = TOPICS.map((topic) => ({
-      topic,
-      numPartitions: PARTITION_VALUE,
-      replicationFactor: REPLICATION_FACTOR,
-    }));
-
-    const result = await ADMIN.createTopics({
-      topics: topicsToCreate,
-      waitForLeaders: true,
-    });
-
-    logger.info(
-      `Kafka Topics created: ${result ? TOPICS.join(", ") : "Already exists"}`
-    );
+    if (topicsToCreate.length > 0) {
+      const result = await ADMIN.createTopics({
+        topics: topicsToCreate,
+        waitForLeaders: true,
+      });
+      logger.info(
+        `Kafka Topics created: ${result ? TOPICS.join(", ") : "Already exists"}`
+      );
+    } else {
+      logger.warn("Some topics were not created (maybe they already exist)");
+    }
   } catch (error) {
     logger.error("Error creating Kafka topics:", error);
   } finally {

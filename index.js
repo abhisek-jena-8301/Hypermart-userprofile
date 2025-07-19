@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./src/controller/user.controller.js";
 import empRoutes from "./src/controller/employee.controller.js";
 import payrollRoutes from "./src/controller/payroll.controller.js";
+import kafkaRoutes from "./src/controller/kafka.controller.js";
 import { createTopics, PRODUCER } from "./src/config/kafka.config.js";
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use(
 app.use("/user", userRoutes);
 app.use("/emp", empRoutes);
 app.use("/payroll", payrollRoutes);
+app.use("/kafka-test", kafkaRoutes);
 
 const startServer = async () => {
   try {
