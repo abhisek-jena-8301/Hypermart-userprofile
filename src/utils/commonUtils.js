@@ -63,6 +63,15 @@ export const validateAdminRequests = (userId) => {
   return false;
 };
 
+export const provideAccessRights = (userId) => {
+  const role = userId.slice(0, 3);
+  console.log("provideAccessRights : ", role);
+  if (role === USER_ROLE.EMPLOYEE_PREFIX) return [];
+  else if (userId === process.env.SUPERADMIN_USER)
+    return [USER_ROLE.ADMIN_ROLE, USER_ROLE.EMPLOYEE_ROLE];
+  else return [USER_ROLE.EMPLOYEE_ROLE];
+};
+
 export const validatePanCardDetails = (panId) => {
   //regex check for PAN card detail check
   return PAN_REGEX.test(panId.toUpperCase());

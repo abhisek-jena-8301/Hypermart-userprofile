@@ -27,7 +27,8 @@ export const BASIC_MIN_WAGE = 350;
 export const DEPT = {
   SECURITY: "Security",
   ADMINISTRATION: "Administration",
-  STAFF: "Staff",
+  INVENTORY: "Inventory",
+  CASHIER: "Cashier",
   SALES: "Sales",
 };
 
