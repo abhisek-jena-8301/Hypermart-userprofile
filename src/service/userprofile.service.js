@@ -1,6 +1,7 @@
 import logger from "../config/logger.config.js";
 import bcrypt from "bcrypt";
 import prisma from "../config/db.config.js";
+import { Prisma } from "@prisma/client";
 import {
   createOTP,
   createUserId,
@@ -347,5 +348,48 @@ export const resumeUser = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error at resumeUser", error: error_msg });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  console.log("Inside updateUser");
+  try {
+    console.log("req: " + req.body);
+    const { firstName, lastName, address, mobileNo, emailId } = req.body;
+    if (!firstName || !mobileNo || !emailId) {
+      return res
+        .status(400)
+        .json({ message: "Mandatory details missing. Please try again" });
+    }
+    const userId = req.body.userId;
+    if (!userId) {
+      return res.status(400).json({
+        message: "Invalid request - No userId found",
+      });
+    }
+    await prisma.user_profile.update({
+      where: { userId },
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        emailId: emailId,
+        contact: mobileNo,
+        address: address,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Your profile has been updated successfully!" });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      logger.warn("No record found");
+      return res.status(404).json({ message: "User not found" });
+    }
+    logger.error("Error at updateUserProfile : " + error);
+    return res.status(500).json({ message: "Error at updateUserProfile" });
   }
 };

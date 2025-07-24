@@ -7,6 +7,7 @@ import {
   resumeUser,
   statusCheckApi,
   suspendUser,
+  updateUserProfile,
 } from "../service/userprofile.service.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 
@@ -26,6 +27,7 @@ router.get("/fetchUserDetails", verifyJWT, fetchUserDetails);
 router.put("/suspendUser", verifyJWT, suspendUser);
 //resumeUser
 router.put("/resumeUser", verifyJWT, resumeUser);
-//terminateUser
+//updateUserProfile
+router.put("/updateUserProfile", verifyJWT, updateUserProfile);
 
 export default router;

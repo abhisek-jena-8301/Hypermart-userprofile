@@ -28,9 +28,10 @@ export const DEPT = {
   SECURITY: "Security",
   ADMINISTRATION: "Administration",
   STAFF: "Staff",
+  SALES: "Sales",
 };
 
 export const NO_MORE_TRIES = "No more tries left. Please register again";
 export const SUCCESS_MAIL_OTP_CHECK = "Successfull verification of mail Id";
 
-export const REGISTRATION_MAIL_VERIFY = "registration-mailverify"
+export const REGISTRATION_MAIL_VERIFY = "registration-mailverify";
