@@ -4,6 +4,7 @@ import {
   fetchUserDetails,
   fetchUserListByName,
   fetchUserList,
+  filterRecordsByCondition,
 } from "../service/employeeprofile.service.js";
 
 const router = Router();
@@ -14,5 +15,7 @@ router.get("/fetchList", verifyJWT, fetchUserList);
 router.get("/fetch/:userId", verifyJWT, fetchUserDetails);
 //fetch user details by name
 router.get("/fetchUserByName", verifyJWT, fetchUserListByName);
+//fetch user list by Condition
+router.get("/fetchUserListByCondition", verifyJWT, filterRecordsByCondition);
 
 export default router;

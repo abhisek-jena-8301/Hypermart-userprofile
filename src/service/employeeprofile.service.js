@@ -93,6 +93,49 @@ export const fetchUserListByName = async (req, res) => {
   }
 };
 
+export const filterRecordsByCondition = async (req, res) => {
+  try {
+    if (!req.query.departments || !req.query.statuses) {
+      return res.status(400).json({ message: ERROR_MESSAGES.INAVLID_DATA });
+    }
+    const userId = req.user.userId;
+    //validate if its sent only by admin
+    if (!validateAdminRequests(userId)) {
+      return res
+        .status(401)
+        .send({ message: ERROR_MESSAGES.INSUFFICIENT_PRIVILEGES });
+    }
+    //access rights check
+    const roles = provideAccessRights(userId);
+    const PAGE_SIZE = 20;
+    const page = parseInt(req.query.page) || 1;
+    const departments = req.query.departments?.split(",") || [];
+    const statuses = req.query.statuses?.split(",") || [];
+
+    const filteredUsers = await prisma.user_profile.findMany({
+      where: {
+        status: { in: statuses },
+        role: { in: roles },
+        employeeSalary: {
+          dept_id: { in: departments },
+        },
+      },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    });
+
+    console.log("users: ", filteredUsers);
+    if (filteredUsers.length === 0)
+      return res.status(200).json({ message: "No user found" });
+    return res
+      .status(200)
+      .json({ message: "Users found succesfully", users: filteredUsers });
+  } catch (error) {
+    logger.error("Error at filterRecordsByCondition : " + error);
+    res.status(400).json({ message: "Error at filterRecordsByCondition" });
+  }
+};
+
 export const fetchUserDetails = async (req, res) => {
   try {
     if (validateAdminRequests(req.user.userId) === false) {
