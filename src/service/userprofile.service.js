@@ -240,28 +240,6 @@ export const fetchUserRole = async (req, res) => {
   }
 };
 
-export const fetchUserDetails = async (req, res) => {
-  console.log("inside fetchuserDetails");
-  try {
-    if (!req.user) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-    console.log("req.user : " + JSON.stringify(req.user));
-    const userId = req.user.userId;
-    console.log(userId);
-    const user = await prisma.user_profile.findUnique({
-      where: { userId: userId },
-    });
-    return res
-      .status(200)
-      .json({ message: "User details fetched succesfully", user: user });
-  } catch (error) {
-    console.log("Error: " + error);
-    logger.error("Error at fetch user details: " + error);
-    return res.status(400).json({ message: "Unable to fetch user details" });
-  }
-};
-
 export const suspendUser = async (req, res) => {
   try {
     if (validateAdminRequests(req.user.userId) === false) {

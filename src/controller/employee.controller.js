@@ -1,13 +1,18 @@
 import { Router } from "express";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 import {
-  fetchEmployeeDetail,
-  fetchEmployeeList,
+  fetchUserDetails,
+  fetchUserListByName,
+  fetchUserList,
 } from "../service/employeeprofile.service.js";
 
 const router = Router();
 
-router.get("/fetchList", verifyJWT, fetchEmployeeList);
-router.get("/fetch/:userId", verifyJWT, fetchEmployeeDetail);
+//fetchUserList
+router.get("/fetchList", verifyJWT, fetchUserList);
+//fetchCompleteUserDetail
+router.get("/fetch/:userId", verifyJWT, fetchUserDetails);
+//fetch user details by name
+router.get("/fetchUserByName", verifyJWT, fetchUserListByName);
 
 export default router;

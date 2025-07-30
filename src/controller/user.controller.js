@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   deleteUser,
-  fetchUserDetails,
   fetchUserRole,
   registerUser,
   resumeUser,
@@ -21,8 +20,6 @@ router.post("/register", registerUser);
 router.delete("/delete", deleteUser);
 //fetchUserRole
 router.get("/fetchUserRole", verifyJWT, fetchUserRole);
-//fetchuserDetails
-router.get("/fetchUserDetails", verifyJWT, fetchUserDetails);
 //suspendUser
 router.put("/suspendUser", verifyJWT, suspendUser);
 //resumeUser
